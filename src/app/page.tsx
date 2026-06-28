@@ -174,6 +174,16 @@ function LoaderIcon({ className }: { className?: string }) {
   );
 }
 
+function StoreIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5" />
+      <path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244" />
+      <path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05" />
+    </svg>
+  );
+}
+
 function FabModal({ onClose, onBackToCheckout }: { onClose: () => void; onBackToCheckout: () => void }) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [pin, setPin] = useState("");
@@ -445,7 +455,7 @@ export default function CheckoutPage() {
             <div className="flex-1 min-w-0 bg-white rounded-r-[20px] flex flex-col">
               <div className="h-[66px] flex items-center gap-3 px-5 border-b border-[#EEEEEE] shrink-0 min-w-0">
                 <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                  <i className="ri-store-2-fill text-[28px] text-[#6F5BD0]" />
+                  <StoreIcon className="w-6 h-6 text-[#6F5BD0]" />
                 </div>
                 <div className="ml-auto min-w-0 basis-[158px] max-w-[158px] text-right">
                   <div className="truncate text-[13px] text-[#777] leading-[1.3]">udechukwuharrison4@gma...</div>
