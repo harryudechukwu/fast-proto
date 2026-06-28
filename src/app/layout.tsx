@@ -8,8 +8,8 @@ const openSans = Open_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Paystack Checkout",
-  description: "Fast Checkout",
+  title: "Acme Checkout (Demo)",
+  description: "UI demo of a checkout flow — no real payments are processed.",
 };
 
 export default function RootLayout({

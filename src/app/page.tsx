@@ -251,7 +251,7 @@ function FabModal({ onClose, onBackToCheckout }: { onClose: () => void; onBackTo
               <div className="min-w-0 bg-[#F3F3F3] rounded-[7px] px-5 py-5 flex flex-col">
                 <div className="mb-[22px]">
                   <div className="text-[11px] font-semibold text-[#5C636B] uppercase tracking-[0.3px] mb-[7px]">BANK NAME</div>
-                  <div className="text-[14px] font-semibold text-[#344157]">Paystack-Titan</div>
+                  <div className="text-[14px] font-semibold text-[#344157]">Acme Bank</div>
                 </div>
                 <div>
                   <div className="text-[11px] font-semibold text-[#5C636B] uppercase tracking-[0.3px] mb-[7px]">ACCOUNT NUMBER</div>
@@ -343,7 +343,7 @@ function FabModal({ onClose, onBackToCheckout }: { onClose: () => void; onBackTo
                 </svg>
                 <div className="text-[16px] font-bold text-[#1D334A] mt-[15px] animate-success-fade">Payment Sent!</div>
                 <div className="text-[14px] text-[#777] mt-[5px] animate-success-fade">
-                  NGN 1,015.23 has been successfully sent to <span className="font-bold">Paystack-Titan</span>
+                  NGN 1,015.23 has been successfully sent to <span className="font-bold">Acme Bank</span>
                 </div>
               </div>
 
@@ -401,6 +401,9 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen w-full bg-white font-sans flex items-center justify-center">
       <div className="w-[calc(100vw-30px)] max-w-[480px] flex flex-col items-center gap-[25px]">
+      <div className="w-full bg-[#FFF8E1] border border-[#F0DBA0] rounded-[8px] px-4 py-2 text-[12px] text-[#8A6D00] text-center leading-snug">
+        Demo only — this is a UI prototype. No real payment is processed and no PIN or bank details are transmitted.
+      </div>
       <div className="relative w-full h-[564px] rounded-[20px] overflow-hidden">
         <div
           className="flex h-full transition-transform duration-300 ease-in-out"
@@ -443,7 +446,7 @@ export default function CheckoutPage() {
             <div className="flex-1 min-w-0 bg-white rounded-r-[20px] flex flex-col">
               <div className="h-[66px] flex items-center gap-3 px-5 border-b border-[#EEEEEE] shrink-0 min-w-0">
                 <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                  <i className="ri-spotify-fill text-[28px] text-[#1DB954]" />
+                  <i className="ri-store-2-fill text-[28px] text-[#6F5BD0]" />
                 </div>
                 <div className="ml-auto min-w-0 basis-[158px] max-w-[158px] text-right">
                   <div className="truncate text-[13px] text-[#777] leading-[1.3]">udechukwuharrison4@gma...</div>
@@ -455,14 +458,14 @@ export default function CheckoutPage() {
 
               <div className="flex-1 min-w-0 flex flex-col pt-[33px] px-5 pb-5">
                 <div className="text-[14px] font-bold text-[#1D334A] leading-[1.4] mb-5">
-                  Transfer NGN 1,015.23 to <span className="uppercase">PAYSTACK CHECKOUT</span>
+                  Transfer NGN 1,015.23 to <span className="uppercase">ACME CHECKOUT</span>
                 </div>
 
                 <div className="w-full bg-[#F3F3F3] rounded-[7px] px-5 py-5 flex flex-col">
                   <div className="mb-[22px]">
                     <div className="text-[9px] font-semibold text-[#5C636B] uppercase tracking-[0.3px] mb-[7px]">BANK NAME</div>
                     <div className="flex items-center justify-between min-w-0">
-                      <span className="min-w-0 truncate text-[14px] font-semibold text-[#344157]">Paystack-Titan</span>
+                      <span className="min-w-0 truncate text-[14px] font-semibold text-[#344157]">Acme Bank</span>
                     </div>
                   </div>
                   <div className="mb-[22px]">
@@ -484,14 +487,14 @@ export default function CheckoutPage() {
                 <div className="w-full border-t border-dashed border-[#B7BEC3] my-[19px]" />
 
                 <div className="text-[12px] leading-[16px] text-[#6A7079] flex-1">
-                  Search for Paystack-Titan or Titan-Paystack in your bank app. This account is for this transaction only and expires in{" "}
+                  Search for Acme Bank in your bank app. This account is for this transaction only and expires in{" "}
                   <span className={seconds < 60 ? "text-[#E53935] font-semibold" : "text-[#14B665] font-semibold"}>
                     {timerStr}
                   </span>
                 </div>
 
                 <button
-                  onClick={() => console.log("Payment confirmed: NGN 1,015.23 to Paystack-Titan")}
+                  onClick={() => console.log("Payment confirmed: NGN 1,015.23 to Acme Bank")}
                   className="w-full h-[42px] bg-white border border-[#DCDCDC] rounded-[4px] text-[14px] font-medium text-[#666] mt-[14px] flex items-center justify-center cursor-pointer hover:bg-[#FAFAFA] transition-colors"
                 >
                   I&apos;ve sent the money
@@ -535,7 +538,7 @@ export default function CheckoutPage() {
             </svg>
             <div className="text-[16px] font-bold text-[#1D334A] mt-[15px] animate-success-fade">Payment Sent!</div>
             <div className="text-[14px] text-[#777] mt-[5px] animate-success-fade">
-              NGN 1,015.23 has been successfully sent to <span className="font-bold">Spotify Inc</span>
+              NGN 1,015.23 has been successfully sent to <span className="font-bold">Acme Inc</span>
             </div>
           </div>
         </div>
@@ -549,7 +552,7 @@ export default function CheckoutPage() {
           </svg>
         </span>
         <span>Secured by</span>
-        <span className="text-[#b0b0b0] font-semibold">paystack</span>
+        <span className="text-[#b0b0b0] font-semibold">Acme Pay</span>
       </div>
       </div>
       {mainStage !== "success" && <Fab onClick={handleFabClick} />}
