@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+A PalmPay-style "Fast Checkout" modal built on top of a Paystack-like checkout page, using Next.js (App Router), React, and Tailwind CSS.
 
-## Getting Started
+## What's in here
 
-First, run the development server:
+A single-page checkout demo (`src/app/page.tsx`) with a floating action button that opens a 3-state modal:
+
+1. **Transfer summary** — bank details and a "Pay" button.
+2. **PIN entry** — 4 animated PIN dots, a hidden numeric input (works with the native mobile keyboard), and a "Secured Input" badge. Confirming shows a loading spinner, then advances to success.
+3. **Success** — an animated checkmark, "Payment Sent!", and "View Receipt" / "Back to checkout" actions.
+
+All three states live in one modal container and transition with a horizontal slide (CSS `transform`, no animation libraries). Closing via "Back to checkout" also triggers a matching loading/success sequence on the underlying checkout page: the whole card slides away and a centered confirmation takes its place.
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3005](http://localhost:3005) (the dev server runs on port 3005, see `package.json`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js 16 (App Router)
+- React 19
+- Tailwind CSS v4
+- [Remixicon](https://remixicon.com/) for icons
 
-## Learn More
+## Deployment
 
-To learn more about Next.js, take a look at the following resources:
+Deployed on [Netlify](https://www.netlify.com/) via the [Next.js Runtime](https://docs.netlify.com/frameworks/next-js/overview/) — push to `main`/`master` and Netlify builds and deploys automatically once the site is linked.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- This Next.js version has breaking changes from what you may know — see `AGENTS.md` before making changes; it points at the bundled docs in `node_modules/next/dist/docs/`.
