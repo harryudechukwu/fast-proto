@@ -53,23 +53,49 @@ function Fab({ onClick }: { onClick: () => void }) {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ tx, ty })); } catch {}
   }, []);
 
+  // visualViewport reflects the actually-visible (tappable) area on mobile —
+  // window.innerHeight stays at the toolbar-collapsed size, which lets the FAB
+  // get clamped into a zone the browser's own UI is covering.
+  const getViewportSize = useCallback(() => {
+    const vv = window.visualViewport;
+    return { w: vv?.width ?? window.innerWidth, h: vv?.height ?? window.innerHeight };
+  }, []);
+
   useEffect(() => {
     const el = elRef.current;
     if (!el) return;
+
+    const clampToViewport = (tx: number, ty: number) => {
+      const { w, h } = getViewportSize();
+      const minTx = RIGHT + SIZE - w;
+      const maxTx = RIGHT;
+      const minTy = BOTTOM + SIZE - h;
+      const maxTy = BOTTOM;
+      return { tx: Math.max(minTx, Math.min(maxTx, tx)), ty: Math.max(minTy, Math.min(maxTy, ty)) };
+    };
 
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const { tx, ty } = JSON.parse(saved);
-        const minTx = RIGHT + SIZE - window.innerWidth;
-        const maxTx = RIGHT;
-        const minTy = BOTTOM + SIZE - window.innerHeight;
-        const maxTy = BOTTOM;
-        dragRef.current.tx = Math.max(minTx, Math.min(maxTx, tx));
-        dragRef.current.ty = Math.max(minTy, Math.min(maxTy, ty));
+        const clamped = clampToViewport(tx, ty);
+        dragRef.current.tx = clamped.tx;
+        dragRef.current.ty = clamped.ty;
         el.style.transform = `translate(${dragRef.current.tx}px, ${dragRef.current.ty}px)`;
       }
     } catch {}
+
+    const reclamp = () => {
+      if (dragRef.current.dragging) return;
+      const clamped = clampToViewport(dragRef.current.tx, dragRef.current.ty);
+      if (clamped.tx === dragRef.current.tx && clamped.ty === dragRef.current.ty) return;
+      dragRef.current.tx = clamped.tx;
+      dragRef.current.ty = clamped.ty;
+      el.style.transform = `translate(${dragRef.current.tx}px, ${dragRef.current.ty}px)`;
+      save(dragRef.current.tx, dragRef.current.ty);
+    };
+    window.visualViewport?.addEventListener("resize", reclamp);
+    window.addEventListener("resize", reclamp);
 
     const onMove = (e: PointerEvent) => {
       if (!dragRef.current.dragging) return;
@@ -77,12 +103,9 @@ function Fab({ onClick }: { onClick: () => void }) {
       const totalDy = e.clientY - dragRef.current.startY;
       const rawTx = dragRef.current.startTx + totalDx;
       const rawTy = dragRef.current.startTy + totalDy;
-      const minTx = RIGHT + SIZE - window.innerWidth;
-      const maxTx = RIGHT;
-      const minTy = BOTTOM + SIZE - window.innerHeight;
-      const maxTy = BOTTOM;
-      dragRef.current.tx = Math.max(minTx, Math.min(maxTx, rawTx));
-      dragRef.current.ty = Math.max(minTy, Math.min(maxTy, rawTy));
+      const clamped = clampToViewport(rawTx, rawTy);
+      dragRef.current.tx = clamped.tx;
+      dragRef.current.ty = clamped.ty;
       el.style.transform = `translate(${dragRef.current.tx}px, ${dragRef.current.ty}px)`;
     };
 
@@ -123,11 +146,21 @@ function Fab({ onClick }: { onClick: () => void }) {
       el.addEventListener("pointerup", onUp);
     };
 
+    // Mobile browsers fire a synthetic "click" after touchend regardless of
+    // PointerEvent.preventDefault(); that click lands wherever just got
+    // rendered at the touch point (e.g. the modal backdrop), instantly
+    // closing what we opened. Only blocking the raw TouchEvent prevents it.
+    const onTouchEnd = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener("touchend", onTouchEnd, { passive: false });
+
     el.addEventListener("pointerdown", onDown);
     return () => {
       el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("touchend", onTouchEnd);
+      window.visualViewport?.removeEventListener("resize", reclamp);
+      window.removeEventListener("resize", reclamp);
     };
   }, [onClick]);
 
@@ -265,7 +298,7 @@ function FabModal({ onClose, onBackToCheckout }: { onClose: () => void; onBackTo
                 </div>
                 <div>
                   <div className="text-[11px] font-semibold text-[#5C636B] uppercase tracking-[0.3px] mb-[7px]">ACCOUNT NUMBER</div>
-                  <div className="text-[14px] font-semibold text-[#344157]">9886623425</div>
+                  <div className="text-[14px] font-semibold text-[#344157]">0123456789</div>
                 </div>
               </div>
               <button
@@ -419,17 +452,17 @@ export default function CheckoutPage() {
           style={{ width: "200%", transform: `translateX(${mainStage === "success" ? "-50%" : "0%"})` }}
         >
           {/* Card: sidebar + header + checkout content, slides away as one unit */}
-          <div className="relative flex border border-[#E0E0E0] rounded-[20px]" style={{ flex: "0 0 50%" }}>
+          <div className="relative flex min-w-0 border border-[#E0E0E0] rounded-[20px]" style={{ flex: "0 0 50%" }}>
 
-            <div className="w-[130px] min-w-[120px] bg-[#F4F4F4] rounded-l-[20px] flex flex-col shrink-0 border-r border-[#E0E0E0]">
-              <div className="h-[66px] flex items-start pt-[33px] pl-[15px]">
+            <div className="w-[130px] min-w-[120px] max-[403px]:w-[92px] max-[403px]:min-w-[84px] bg-[#F4F4F4] rounded-l-[20px] flex flex-col shrink-0 border-r border-[#E0E0E0]">
+              <div className="h-[66px] flex items-start pt-[33px] pl-[15px] max-[403px]:pl-[10px]">
                 <span className="text-[12px] font-bold text-[#4C4C4C] tracking-[0.3px]">PAY WITH</span>
               </div>
               <div className="flex flex-col">
                 {navItems.map((item) => (
                   <div
                     key={item.label}
-                    className="relative h-[49px] flex items-center px-[15px] gap-[10px] border-b border-[#E3E3E3] min-w-0"
+                    className="relative h-[49px] flex items-center px-[15px] max-[403px]:px-[8px] gap-[10px] max-[403px]:gap-[6px] border-b border-[#E3E3E3] min-w-0"
                   >
                     <i className={`${item.icon} text-[16px] ${item.active ? "text-[#0AAF5B]" : "text-[#7A7A7A]"}`} />
                     <span
@@ -453,24 +486,24 @@ export default function CheckoutPage() {
             </div>
 
             <div className="flex-1 min-w-0 bg-white rounded-r-[20px] flex flex-col">
-              <div className="h-[66px] flex items-center gap-3 px-5 border-b border-[#EEEEEE] shrink-0 min-w-0">
-                <div className="w-8 h-8 flex items-center justify-center shrink-0">
-                  <StoreIcon className="w-6 h-6 text-[#6F5BD0]" />
+              <div className="h-[66px] flex items-center gap-3 max-[403px]:gap-2 px-5 max-[403px]:px-3 border-b border-[#EEEEEE] shrink-0 min-w-0">
+                <div className="w-8 h-8 max-[403px]:w-6 max-[403px]:h-6 flex items-center justify-center shrink-0">
+                  <StoreIcon className="w-6 h-6 max-[403px]:w-5 max-[403px]:h-5 text-[#6F5BD0]" />
                 </div>
-                <div className="ml-auto min-w-0 basis-[158px] max-w-[158px] text-right">
-                  <div className="truncate text-[13px] text-[#777] leading-[1.3]">udechukwuharrison4@gma...</div>
-                  <div className="text-[14px] text-[#777] leading-[1.4] whitespace-nowrap">
+                <div className="ml-auto min-w-0 basis-[158px] max-w-[158px] max-[403px]:basis-0 max-[403px]:flex-1 max-[403px]:max-w-none text-right">
+                  <div className="truncate text-[13px] text-[#777] leading-[1.3]">customer@example.com</div>
+                  <div className="text-[14px] max-[403px]:text-[12px] text-[#777] leading-[1.4] whitespace-nowrap">
                     Pay <strong className="text-[#12AD5C] font-bold">NGN 1,015.23</strong>
                   </div>
                 </div>
               </div>
 
-              <div className="flex-1 min-w-0 flex flex-col pt-[33px] px-5 pb-5">
+              <div className="flex-1 min-w-0 flex flex-col pt-[33px] px-5 max-[403px]:px-3 pb-5">
                 <div className="text-[14px] font-bold text-[#1D334A] leading-[1.4] mb-5">
                   Transfer NGN 1,015.23 to <span className="uppercase">ACME CHECKOUT</span>
                 </div>
 
-                <div className="w-full bg-[#F3F3F3] rounded-[7px] px-5 py-5 flex flex-col">
+                <div className="w-full bg-[#F3F3F3] rounded-[7px] px-5 max-[403px]:px-3 py-5 max-[403px]:py-3 flex flex-col">
                   <div className="mb-[22px]">
                     <div className="text-[9px] font-semibold text-[#5C636B] uppercase tracking-[0.3px] mb-[7px]">BANK NAME</div>
                     <div className="flex items-center justify-between min-w-0">
@@ -480,8 +513,8 @@ export default function CheckoutPage() {
                   <div className="mb-[22px]">
                     <div className="text-[9px] font-semibold text-[#5C636B] uppercase tracking-[0.3px] mb-[7px]">ACCOUNT NUMBER</div>
                     <div className="flex items-center justify-between min-w-0 gap-3">
-                      <span className="min-w-0 truncate text-[14px] font-semibold text-[#344157]">9886623425</span>
-                      <CopyBtn value="9886623425" />
+                      <span className="min-w-0 truncate text-[14px] font-semibold text-[#344157]">0123456789</span>
+                      <CopyBtn value="0123456789" />
                     </div>
                   </div>
                   <div>
@@ -521,7 +554,7 @@ export default function CheckoutPage() {
           {/* Bare success view, centered, no card chrome */}
           <div
             key={mainStage}
-            className="flex flex-col items-center justify-center text-center px-5"
+            className="flex flex-col items-center justify-center text-center px-5 min-w-0"
             style={{ flex: "0 0 50%" }}
           >
             <svg width="56" height="56" viewBox="0 0 56 56">
@@ -553,15 +586,17 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-[6px] text-[#999] text-[15px]">
-        <span className="flex items-center opacity-50">
-          <svg width="14" height="14" viewBox="0 0 12 12" fill="none">
-            <rect x="2.5" y="5.5" width="7" height="5" rx=".5" stroke="#999" strokeWidth="1" />
-            <path d="M4 5.5V3.5a2 2 0 014 0v2" stroke="#999" strokeWidth="1" fill="none" />
-          </svg>
-        </span>
-        <span>Secured by</span>
-        <span className="text-[#b0b0b0] font-semibold">Acme Pay</span>
+      <div className="w-full flex justify-center">
+        <div className="flex items-center gap-[6px] max-[403px]:gap-1.5 text-[#999] text-[15px] max-[403px]:text-[13px]">
+          <span className="flex items-center opacity-50">
+            <svg width="14" height="14" className="max-[403px]:w-[13px] max-[403px]:h-[13px]" viewBox="0 0 12 12" fill="none">
+              <rect x="2.5" y="5.5" width="7" height="5" rx=".5" stroke="#999" strokeWidth="1" />
+              <path d="M4 5.5V3.5a2 2 0 014 0v2" stroke="#999" strokeWidth="1" fill="none" />
+            </svg>
+          </span>
+          <span>Secured by</span>
+          <span className="text-[#b0b0b0] font-semibold">Acme Pay</span>
+        </div>
       </div>
       </div>
       {mainStage !== "success" && <Fab onClick={handleFabClick} />}
