@@ -44,7 +44,6 @@ function Fab({ onClick }: { onClick: () => void }) {
   const dragRef = useRef({
     startX: 0, startY: 0, startTx: 0, startTy: 0, tx: 0, ty: 0, dragging: false,
   });
-  const SIZE = 56;
   const RIGHT = 24;
   const BOTTOM = 24;
   const CLICK_THRESHOLD = 15;
@@ -67,9 +66,13 @@ function Fab({ onClick }: { onClick: () => void }) {
 
     const clampToViewport = (tx: number, ty: number) => {
       const { w, h } = getViewportSize();
-      const minTx = RIGHT + SIZE - w;
+      // offsetWidth/Height are the element's intrinsic box size — unaffected
+      // by the translate() we apply for dragging, so safe to read anytime.
+      const elW = el.offsetWidth;
+      const elH = el.offsetHeight;
+      const minTx = RIGHT + elW - w;
       const maxTx = RIGHT;
-      const minTy = BOTTOM + SIZE - h;
+      const minTy = BOTTOM + elH - h;
       const maxTy = BOTTOM;
       return { tx: Math.max(minTx, Math.min(maxTx, tx)), ty: Math.max(minTy, Math.min(maxTy, ty)) };
     };
@@ -167,9 +170,15 @@ function Fab({ onClick }: { onClick: () => void }) {
   return (
     <div
       ref={elRef}
-      className="fixed bottom-6 right-6 w-14 h-14 bg-[#6F5BD0] rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing z-50 select-none touch-none"
+      className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-[5px] select-none touch-none cursor-grab active:cursor-grabbing"
     >
-      <i className="ri-flashlight-fill text-white text-[26px]" />
+      <div className="relative w-14 h-14 bg-[#6F5BD0] outline outline-[1px] outline-[#5C4AB8] rounded-full flex items-center justify-center overflow-hidden">
+        <span className="absolute top-1/2 left-1/2 w-7 h-7 rounded-full bg-white animate-icon-ping" />
+        <i className="relative ri-flashlight-fill text-white text-[26px]" />
+      </div>
+      <span className="px-3.5 py-1.5 bg-[#FBF9FE] border border-[#D8CFF2] text-[#6F5BD0] text-[13px] font-semibold rounded-full whitespace-nowrap">
+        Tap to pay
+      </span>
     </div>
   );
 }
